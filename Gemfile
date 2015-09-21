@@ -11,3 +11,8 @@ group :development, :test do
   gem 'database_cleaner', '1.4.1'
   gem 'web-console', '~> 2.0'
 end
+
+group :test do
+  gem 'm', '~> 1.3'
+  gem 'pry'
+end

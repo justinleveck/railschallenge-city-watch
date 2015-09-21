@@ -1,0 +1,14 @@
+# Read about fixtures at
+# http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  code: MyString
+  fire_severity: MyString
+  police_severity: MyString
+  medical_severity: MyString
+
+two:
+  code: MyString
+  fire_severity: MyString
+  police_severity: MyString
+  medical_severity: MyString
