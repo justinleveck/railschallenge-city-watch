@@ -12,11 +12,10 @@ class Emergency < ActiveRecord::Base
   private
 
   def severity_greater_than_or_equal_to_zero
-    severities = self.attribute_names.keep_if { |n| n if n.include?('severity') }
+    severities = attribute_names.keep_if { |n| n if n.include?('severity') }
 
     severities.each do |severity|
       errors.add(severity.to_sym, 'must be greater than or equal to 0') if self[severity].to_i < 0
     end
   end
 end
-

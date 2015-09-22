@@ -12,15 +12,13 @@ class EmergenciesController < ApplicationController
   end
 
   def create
-   if emergency_params.present?
-     @emergency = Emergency.new(emergency_params)
-   end
+    @emergency = Emergency.new(emergency_params) if emergency_params.present?
 
-   if params_permitted? && @emergency.save
-     render action: 'show', formats: 'json', status: 201
-   else
-     render_error_messages(@emergency)
-   end
+    if params_permitted? && @emergency.save
+      render action: 'show', formats: 'json', status: 201
+    else
+      render_error_messages(@emergency)
+    end
   end
 
   def edit
@@ -45,9 +43,9 @@ class EmergenciesController < ApplicationController
     @unpermitted_param_errors = nil
     unpermitted_params.each do |unpermitted_param|
       @unpermitted_param_errors ||= "found unpermitted parameter: #{unpermitted_param}"
-      return false
+      false
     end
 
-    return true
+    true
   end
 end
