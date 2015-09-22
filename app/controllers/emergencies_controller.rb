@@ -3,8 +3,13 @@ class EmergenciesController < ApplicationController
   end
 
   def show
-    @emergency = Emergency.find_by_code(code)
-    render action: 'show', formats: 'json'
+    @emergency = Emergency.find_by_code(params[:code])
+
+    if @emergency
+      render action: 'show', formats: 'json'
+    else
+      render_404
+    end
   end
 
   def new
