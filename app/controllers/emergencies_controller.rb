@@ -16,7 +16,7 @@ class EmergenciesController < ApplicationController
      @emergency = Emergency.new(emergency_params)
    end
 
-   if @emergency.save
+   if params_permitted? && @emergency.save
      render action: 'show', formats: 'json', status: 201
    else
      render_error_messages(@emergency)
@@ -34,6 +34,20 @@ class EmergenciesController < ApplicationController
   private
 
   def emergency_params
-    params.require(:emergency).permit(:id, :code, :fire_severity, :police_severity, :medical_severity, :resolved_at)
+    params.require(:emergency).permit(:code, :fire_severity, :police_severity, :medical_severity)
+  end
+
+  def unpermitted_params
+    request.request_parameters[request.request_parameters.first[0]].keys - emergency_params.keys
+  end
+
+  def params_permitted?
+    @unpermitted_param_errors = nil
+    unpermitted_params.each do |unpermitted_param|
+      @unpermitted_param_errors ||= "found unpermitted parameter: #{unpermitted_param}"
+      return false
+    end
+
+    return true
   end
 end
