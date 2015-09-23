@@ -39,18 +39,4 @@ class EmergenciesController < ApplicationController
   def emergency_params
     params.require(:emergency).permit(:code, :fire_severity, :police_severity, :medical_severity)
   end
-
-  def unpermitted_params
-    request.request_parameters[request.request_parameters.first[0]].keys - emergency_params.keys
-  end
-
-  def params_permitted?
-    @unpermitted_param_errors = nil
-    unpermitted_params.each do |unpermitted_param|
-      @unpermitted_param_errors ||= "found unpermitted parameter: #{unpermitted_param}"
-      false
-    end
-
-    true
-  end
 end
