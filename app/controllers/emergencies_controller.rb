@@ -1,5 +1,7 @@
 class EmergenciesController < ApplicationController
   def index
+    @emergencies = Emergency.all
+    render action: 'index', formats: 'json'
   end
 
   def show
@@ -16,6 +18,10 @@ class EmergenciesController < ApplicationController
     render_404
   end
 
+  def edit
+    render_404
+  end
+
   def create
     @emergency = Emergency.new(emergency_params) if emergency_params.present?
 
@@ -26,8 +32,7 @@ class EmergenciesController < ApplicationController
     end
   end
 
-  def edit
-    render_404
+  def update
   end
 
   def destroy
