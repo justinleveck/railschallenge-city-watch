@@ -57,9 +57,9 @@ class EmergenciesController < ApplicationController
     unpermitted_update_params = []
 
     if action_name == "update"
-        unpermitted_update_params << "code" if emergency_params[:code].present?
+      unpermitted_update_params << "code" if emergency_params[:code].present?
     elsif action_name == "create"
-        unpermitted_update_params << "resolved_at" if emergency_params[:resolved_at].present?
+      unpermitted_update_params << "resolved_at" if emergency_params[:resolved_at].present?
     end
 
     super + unpermitted_update_params
