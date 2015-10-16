@@ -43,8 +43,8 @@ class Emergency < ActiveRecord::Base
 
   def dispatch
     severities.each do |severity_type, severity_value|
-      available_responders = Responder.available_on_duty_for_emergency_severity(severity_type)
-      capable_responders = Responder.filter_by_capacity(available_responders, severity_value)
+      available_responders = Responder.type_available_on_duty(severity_type)
+      capable_responders = available_responders.with_capacity(severity_value)
       responder_dispatched = capable_responders.first.try(:dispatch, code)
 
       unless responder_dispatched

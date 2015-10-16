@@ -6,13 +6,31 @@ class Responder < ActiveRecord::Base
   validates :name, presence: true, uniqueness: true
   validates :type, presence: true
 
+  scope :type_available_on_duty, ->(type) { 
+    where(
+      emergency_code: nil, 
+      type: type.titlecase, 
+      on_duty: true).order(capacity: :desc)
+  }
+
+  scope :with_capacity, ->(capacity) { where(capacity: capacity) }
+
+  scope :type_available_on_duty_capacity, ->(type) {
+    joins("LEFT JOIN `emergencies` ON responders.emergency_code = emergencies.code")
+    .where("responders.type = ?", type)
+    .where("responders.on_duty='t'")
+    .where("responders.emergency_code IS NULL OR emergencies.resolved_at IS NOT NULL")
+  }
+
+  scope :type_available, ->(type) {
+    joins("LEFT JOIN `emergencies` ON responders.emergency_code = emergencies.code")
+    .where("responders.type = ?", type)
+    .where("emergencies.resolved_at IS NOT NULL OR responders.emergency_code IS NULL")
+
+  }
+
   def capacity_matches_emergency_severity?
     Responder.capacity_matches_emergency_severity?(emergency, self)
-  end
-
-  def self.filter_by_capacity(responders, emergency_severity_value)
-    return [] if responders.nil?
-    responders.select { |responder| responder['capacity'] == emergency_severity_value }
   end
 
   def dispatch(emergency_code)
@@ -24,20 +42,6 @@ class Responder < ActiveRecord::Base
     emergency[emergency_severity] == responder.capacity
   end
 
-  def self.available_on_duty_for_emergency_severity(emergency_severity_type, emergency_severity_value = nil)
-    available_on_duty = where(emergency_code: nil, type: emergency_severity_type.titlecase, on_duty: true).order(capacity: :desc)
-
-    if emergency_severity_value.present?
-      available_on_duty.each do |responder|
-        (available_on_duty_capacity_matching_emergency_severity ||= []) << responder if emergency_severity_severity_value == responder.capacity
-      end
-
-      return available_on_duty_capacity_matching_emergency_severity
-    end
-
-    available_on_duty || []
-  end
-
   def self.capacities
     capacities = {}
     Responder.select('type').each do |responder|
@@ -47,25 +51,27 @@ class Responder < ActiveRecord::Base
     capacities
   end
 
-  def self.available(type)
-    Responder.where(type: type).reduce([]) do |responders, responder|
-      responders << responder.capacity if responder.emergency.try(:resolved_at).present? || responder.emergency_code.nil?
-      responders
-    end
+  def self.all_capacity_total(type)
+    Responder.select('capacity').where(type: type).map(&:capacity).sum
   end
 
-  def self.available_on_duty(type)
-    Responder.where(type: type).reduce([]) do |responders, responder|
-      responders << responder.capacity if (responder.emergency.try(:resolved_at).present? || responder.emergency_code.nil?) && responder.on_duty == true
-      responders
-    end
+  def self.available_capacity_total(type)
+    type_available(type).map(&:capacity).sum
+  end
+
+  def self.on_duty_capacity_total(type)
+    Responder.select('capacity').where(type: type, on_duty: true).map(&:capacity).sum
+  end
+
+  def self.available_on_duty_capacity_total(type)
+    type_available_on_duty_capacity(type).map(&:capacity).sum 
   end
 
   def self.type_capacities(type)
-    all = Responder.select('capacity').where(type: type).map(&:capacity).sum
-    available = available(type).sum
-    on_duty = Responder.select('capacity').where(type: type, on_duty: true).map(&:capacity).sum
-    available_on_duty = available_on_duty(type).sum
+    all = all_capacity_total(type)
+    available = available_capacity_total(type)
+    on_duty = on_duty_capacity_total(type)
+    available_on_duty = available_on_duty_capacity_total(type)
 
     [all, available, on_duty, available_on_duty]
   end
