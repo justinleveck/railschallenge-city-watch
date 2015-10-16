@@ -2,7 +2,7 @@ class Emergency < ActiveRecord::Base
   has_many :responders, foreign_key: :emergency_code, primary_key: :code
 
   validates :code, uniqueness: true, presence: true
-  validate :severity_greater_than_or_equal_to_zero
+  validate  :severity_greater_than_or_equal_to_zero
   validates :police_severity, presence: true, numericality: true
   validates :fire_severity, presence: true, numericality: true
   validates :medical_severity, presence: true, numericality: true
