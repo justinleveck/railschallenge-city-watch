@@ -26,7 +26,6 @@ class Responder < ActiveRecord::Base
     joins("LEFT JOIN `emergencies` ON responders.emergency_code = emergencies.code")
     .where("responders.type = ?", type)
     .where("emergencies.resolved_at IS NOT NULL OR responders.emergency_code IS NULL")
-
   }
 
   def capacity_matches_emergency_severity?
